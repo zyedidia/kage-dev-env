@@ -31,10 +31,10 @@ else ifeq ($(filter x86_64 arm64 i386,$(ARCH)),)
 endif
 
 .PHONY: default
-default: linux linux_modules tools-vm
+default: linux linux_modules 
 
 .PHONY: clean
-clean: linux_clean tools-vm_clean
+clean: linux_clean 
 
 .PHONY: help
 help:
@@ -263,11 +263,10 @@ endif
 
 .PHONY: tools-vm
 tools-vm: | $(SHARED_DIR)
-	+ $(TOOLS_MAKE) vm_install
-
+	+ $(TOOLS_MAKE) objtool
 .PHONY: tools-vm_clean
 tools-vm_clean:
-	+ $(TOOLS_MAKE) vm_clean
+	+ $(TOOLS_MAKE) objtool_clean
 	rm -f $(SHARED_DIR)/tools/$(ARCH)/{page_owner_sort,page-types,slabinfo}
 
 ##
