@@ -2,25 +2,22 @@ Basic instructions on how to run Kage.
 
 > cd into a project directory
 
-> git clone --branch kage https://github.com/jnwatson/linux-exploit-dev-env
+> git clone --recursive --branch kage https://github.com/jnwatson/linux-exploit-dev-env
 
 Follow the directions in the README.md to set up.  You'll want to ACK=1
 ARCH=arm64 to your environment or to a .env file in that checkout (as described
-at the end of the readme).
-
-This will download a standard android common kernel.  We need the one with our
-Kage changes.
-
-> cd linux-exploit-dev-env/ack/common
-> git checkout --branch kage01 https://github.com/jnwatson/kage.git
+at the end of README.md).
 
 From the linux-exploit-dev-env directory, to build the kernel with kage, just
 > make
 
+Just once, you'll need to create the root filesystem:
+> make rootfs-init
+
 To run it in QEMU:
 > make run
 
-You can download my test kernel module here:
+You can download a test kernel module here:
 > git clone https://github.com/jnwatson/kage-victim
 
 You'll have to adjust Makefile or set parameters on the command line to point to
