@@ -4,8 +4,8 @@
 	branch = android14-5.15
 [submodule "ack/common"]
 	path = ack/common
-	url = https://android.googlesource.com/kernel/common
-	branch = android14-5.15
+	url = https://github.com/jnwatson/kage.git
+	branch = kage01
 [submodule "linux"]
 	path = linux
 	url = https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
