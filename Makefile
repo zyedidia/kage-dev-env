@@ -411,7 +411,7 @@ else
 
   QEMU_ARGS += \
     -M virt \
-    -cpu cortex-a53 \
+    -cpu max \
     -semihosting-config enable=on,target=native
 endif
 
@@ -424,6 +424,8 @@ endif
 ifeq ($(ACK),1)
   QEMU_KERNEL_CMDLINE += lede.ack=1
 endif
+
+QEMU_KERNEL_CMDLINE += kunit.enable=1
 
 QEMU_ARGS += -append "$(QEMU_KERNEL_CMDLINE) $(QEMU_EXTRA_KERNEL_CMDLINE)"
 
