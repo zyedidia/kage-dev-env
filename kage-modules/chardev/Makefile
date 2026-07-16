@@ -22,7 +22,7 @@ KBUILD_INC := -I$(BASE_DIR)/ack/common/arch/$(ARCH)/include \
               -I$(KDIR)/include/generated/uapi \
               -include $(KDIR)/include/generated/autoconf.h
 
-chardev-objs := chardev_main.o return.o
+chardev-objs := chardev_main.o
 obj-m += chardev.o
 
 all: modules
