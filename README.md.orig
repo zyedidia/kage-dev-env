@@ -1,0 +1,215 @@
+# Linux Exploit Development Environment
+
+## Quickstart
+
+The only supported host OS is Ubuntu 22.04, things may or may not work on any other system.
+
+First install the dependencies and clone the project:
+```bash
+sudo apt update
+sudo apt install -y bc bison build-essential flex git libelf-dev libssl-dev ncurses-dev gdb gdb-multiarch qemu qemu-system-x86 qemu-system-arm qemu-user-static binfmt-support llvm clang clang-tools lld lz4 binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu pahole dwarves
+git clone --recursive https://github.com/gsingh93/linux-exploit-dev-env
+cd linux-exploit-dev-env
+```
+
+This will clone the Linux kernel and Android Common Kernel (ACK) submodules. You can checkout any version of the kernel you want, i.e.
+```bash
+VERSION=5.10.107 make linux_checkout # Checkout a specific version
+VERSION=5.10.y make linux_checkout # Checkout the latest version of an LTS kernel
+```
+
+Create the default rootfs images:
+```bash
+make rootfs-init
+```
+
+Build and run the Linux kernel:
+```bash
+make
+make run
+```
+
+To exit QEMU, use `ctrl+a x` (`ctrl-c` will not work).
+
+To attach with GDB, set the `GDB` environment variable before running:
+```bash
+GDB=1 make run
+```
+
+And then in another terminal, attach with:
+```bash
+scripts/gdb.sh
+```
+
+The default architecture is x86_64, but arm64 is also supported:
+```bash
+ARCH=arm64 make rootfs-init
+ARCH=arm64 make run
+```
+
+## All Targets and Options
+
+```
+$ make help
+General Environment Variables:
+   ARCH                             - Specify one of the supported architectures: x86_64, i386, arm64 (default: x86_64)
+   ACK                              - Set to 1 to build ACK instead of the Linux kernel. Does not need to be set for `ack` and `run-ack` targets (default: 0)
+   VERBOSE                          - Set to 1 to enable verbose output (default: 0)
+
+Build/Config:
+   Targets:
+      linux (default)               - Build the Linux kernel
+      linux_defconfig               - Run `make defconfig`
+      linux_menuconfig              - Run `make menuconfig`
+      linux_modules                 - Build the Linux kernel modules
+      linux_debpkg                  - Creates a Debian package for the kernel
+      ack                           - Build the Android Common Kernel
+      tools-vm                      - Build linux/tools/vm
+
+   Environment Variables:
+      LINUX_DEFCONFIG               - The defconfig to use when building the kernel (default: defconfig, ACK default: gki_defconfig)
+      LINUX_SRC                     - The path to the kernel source directory (default: linux, ACK default: ack/common)
+      LINUX_OUT                     - The path where the kernel build output should be stored (default: out/linux/$ARCH, ACK default: out/ack/common/$ARCH)
+      LINUX_CONFIG_FRAGMENT         - A kernel config fragment to merge with the defconfig (default: config/config.fragment)
+
+Clean:
+   Targets:
+      clean                         - Clean output from default build targets
+      <target>_clean                - Clean output for <target>, where <target> is one of: ack, linux, tools-vm, rootfs
+
+Run/Debug:
+   Targets:
+      run                           - Run QEMU with the built kernel and rootfs image
+      run-ack                       - Same as `run` but runs ACK instead
+
+   Environment Variables:
+      GDB                           - Set to 1 to start a gdbserver and wait for GDB when running QEMU (default: 0)
+      CPU                           - The number of CPUs to use when running QEMU (default: 4)
+      MEM                           - The memory size in MB to use when running QEMU (default: 1024)
+      QEMU_EXTRA_ARGS               - Additional arguments to pass to QEMU (default: "")
+      QEMU_EXTRA_KERNEL_CMDLINE     - Additional arguments to pass to the kernel (default: "")
+      QEMU_KERNEL_IMAGE             - The path to the kernel image to run (x86_64/i386 default: $LINUX_OUT/arch/$ARCH/boot/bzImage, arm64 default: $LINUX_OUT/arch/$ARCH/boot/Image)
+      ROOTFS                        - The path to the rootfs image file (default: rootfs/alpine-$ARCH.img)
+      ROOTFS_FORMAT                 - The format of the rootfs image file: raw, qcow2 (default: qcow2)
+      INITRD                        - Set to 1 to use the $CPIO_FILE initramfs instead of the $ROOTFS image as the rootfs, or specify the path to an alternative CPIO file (default: "")
+      RDINIT                        - The value of the `rdinit` kernel command line parameter (default: "", default if INITRD is set: /sbin/init)
+      ECHR                          - The value of the QEMU `-echr` flag (default: 1)
+      ROOT                          - The value of the `root` kernel command line parameter (default: /dev/vda)
+      RW                            - Whether to mount the rootfs as read-write or read-only: ro, rw (default: rw)
+      KASLR                         - Set to 1 to enable KASLR (default: 0)
+
+rootfs:
+   Targets:
+      rootfs-init                   - Extract the Alpine Linux rootfs to $ROOTFS_DIR and then run the `rootfs-overlay` target
+      rootfs-overlay                - Apply arch-specific changes to $ROOTFS_DIR and run the `rootfs` target
+      rootfs                        - Run the `ext4` and `cpio` targets
+      ext4                          - Build a $ROOTFS $ROOTFS_FORMAT (default qcow2) image with an ext4 filesystem from $ROOTFS_DIR
+      cpio                          - Build a $CPIO_FILE gzipped initramfs CPIO file from $ROOTFS_DIR
+      initramfs                     - An alias for the `cpio` target
+      uncpio                        - Extract $CPIO_FILE to $ROOTFS_DIR
+      rootfs-mount                  - Mount $ROOTFS image at /tmp/rootfs
+      rootfs-unmount                - Unmount rootfs image from /tmp/rootfs
+      chroot                        - chroot into $ROOTFS_DIR
+
+   Environment Variables:
+      EXT4_SIZE                     - The disk size of the rootfs image to build
+      ROOTFS_DIR                    - The directory to create the ext4 rootfs image and initramfs CPIO from (default: rootfs/alpine-$ARCH)
+      ROOTFS                        - The path to the rootfs image file (default: rootfs/alpine-$ARCH.img)
+      ROOTFS_FORMAT                 - The format of the rootfs image file: raw, qcow2 (default: qcow2)
+      CPIO_FILE                     - The path to the CPIO file to create (default: rootfs/alpine-$ARCH.cpio.gz)
+
+Miscellaneous:
+   Targets:
+      linux_download                - Downloads an archive of the Linux kernel source for the version specified in $VERSION
+      linux_checkout                - Checks out the version specified by $VERSION of the linux kernel in $LINUX_SRC
+
+   Environment Variables:
+      VERSION                       - The version to download or checkout. For checkout only, if the third number in the version string is a 'y', the latest version of the kernel with that major and minor version is used. Examples: 5.10, 5.10.107, v5.10, 5.10.y, linux-5.10.y
+```
+
+## Building
+
+You can customize the path to the linux source and output directories with the `LINUX_SRC` and `LINUX_OUT` environment variables:
+```bash
+LINUX_SRC=/path/to/src LINUX_OUT=/path/to/out make linux
+```
+
+Note that the default output directory is `out/$KERNEL_DIR/$ARCH`, which means that switching between architecture or kernel types (i.e. ACK or Linux) will not overwrite builds of another architecture or kernel type.
+
+### Android Common Kernel (ACK)
+
+Instead of the Linux kernel, you can set the `ACK` variable to build the Android Common Kernel:
+```bash
+ACK=1 make linux
+ACK=1 make run
+```
+
+### defconfig
+
+To generate the default kernel config with the default `defconfig`, run:
+```bash
+make linux_defconfig
+```
+
+The `ARCH` and `ACK` variables can also be used here:
+```bash
+ACK=1 ARCH=arm64 make linux_defconfig
+```
+
+If `ACK` is set `gki_defconfig` is used instead of `defconfig`. By default, `config/config.fragment` is merged into the generated config to create the final kernel config. This can be customized by setting `LINUX_CONFIG_FRAGMENT`.
+
+## rootfs
+
+The default rootfs is based on [Alpine Linux's](https://alpinelinux.org/downloads/) mini root filesystem. `make rootfs-init` will automatically extract the file system to `rootfs/alpine-$ARCH` and create the filesystem image at `rootfs/rootfs-$ARCH.img`. You can modify the file system by modifying the files in `rootfs/alpine-$ARCH` and then running `make rootfs` to regenerate the image. If you have another directory where you keep your rootfs, or you'd like to customize where the output image is stored, you can use the `ROOTFS_DIR` and `ROOTFS` variables:
+```bash
+ROOTFS_DIR=/path/to/rootfs/dir ROOTFS=/path/to/output/rootfs.img ROOTFS_FORMAT=qcow2 make rootfs
+```
+
+If you'd like to use an initramfs instead of a disk image, you can use `make cpio`, which will create `rootfs/alpine-$ARCH.cpio.gz` by default. To build an initramfs from a different directory, use the `INITRAMFS_DIR` variable:
+```bash
+INITRAMFS_DIR=/path/to/initramfs/dir make cpio
+```
+
+Remember to set the correct `ARCH` variable for these commands if you are working with an architecture other than x86_64.
+
+## Running
+
+When running a kernel, you can specify an alternative rootfs or initramfs (but not both) with the `ROOTFS` and `INITRD` variables:
+```bash
+ROOTFS=/path/to/rootfs-qcow2.img make run
+ROOTFS=/path/to/rootfs-raw.img ROOTFS_FORMAT=raw make run
+INITRD=/path/to/initramfs.cpio.gz make run
+```
+
+The number of CPUs and the amount of memory can be configured with the `CPU` and `MEM` variables. You can pass additional arguments to QEMU or the kernel command line with `QEMU_EXTRA_ARGS` and `QEMU_EXTRA_KERNEL_CMDLINE`, respectively:
+```bash
+CPU=4 MEM=2048M QEMU_EXTRA_KERNEL_CMDLINE="nokaslr" QEMU_EXTRA_ARGS="-S -s" make run
+```
+
+As shown earlier, `GDB=1` can be used instead of `QEMU_EXTRA_ARGS="-S -s"`.
+
+## Miscellaneous Commands
+
+`make linux_download` (which downloads a source archive) and `make linux_checkout` can be used to more easily switch between kernel versions. The kernel version to download or checkout must be specified with the `VERSION` environment variable:
+```bash
+VERSION=5.10.107 make linux_download
+VERSION=5.10.107 make linux_checkout
+```
+
+The version string can be specified as `5.10.107` or `v5.10.107` (the name of the version tag in the Linux git repo). You can additionally set the last number to `y` to checkout or download the latest version of that kernel:
+```bash
+VERSION=5.10.y make linux_download
+VERSION=5.10.y make linux_checkout
+```
+
+The `LINUX_SRC` variable can be used to customize the source directory for `linux_checkout`.
+
+These `make` targets are just wrappers around the `./scripts/download_linux.sh` and `./scripts/checkout_linux.sh` scripts, so if you prefer those can be used instead.
+
+## Miscellaneous Features
+
+If a `.env` file exists in root of the repository, it will be sourced at the beginning of the Makefile. If you are often passing in the same environment variables on every invocation (i.e. `ARCH=arm64`), you can add this into `.env` instead of passing it on the command line. If you want to put your most commonly used defaults in `.env` but still use other values for some invocations of `make`, you can override any variables by putting them after the `make` invocation. For example, if `.env` contains `ARCH=arm64`, then `make linux ARCH=x86_64` would set this variable to `x86_64` when building. Setting the variable before the `make` invocation (i.e. `ARCH=x86_64 make linux`) will not override the values defined in `.env`.
+
+If the `TERMINAL_CMD` environment variable is defined when executing `make run`, it will be used to execute `scripts/gdb.sh` automatically before starting QEMU. You can use this to open GDB in a new window or frame. For example, when running `make run` in a `tmux` session, setting `TERMINAL_CMD="tmux splitw -h"` will launch GDB in a new `tmux` pane.
+
+You can add your own `make` targets without modifying the core `makefile`. See the README in the [external](./external) directory for more information and [this project](https://github.com/gsingh93/linux-exploit-dev-env-art-kt) for an example.

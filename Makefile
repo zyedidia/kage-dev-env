@@ -30,8 +30,10 @@ else ifeq ($(filter x86_64 arm64 i386,$(ARCH)),)
   $(error Invalid architecture $(ARCH))
 endif
 
+.NOTPARALLEL:
+
 .PHONY: default
-default: linux linux_modules 
+default: linux linux_modules
 
 .PHONY: clean
 clean: linux_clean 
