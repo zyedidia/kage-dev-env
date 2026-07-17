@@ -52,7 +52,7 @@ lfi:
 
 both: native lfi
 
-install:
+install: all
 	@test -d $(DIST) || { echo "Nothing to install; run 'make both' (or 'make lfi' / 'make native') first"; exit 1; }
 	cp $(DIST)/*.ko $(BASE_DIR)/shared
 
