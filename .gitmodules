@@ -5,7 +5,7 @@
 [submodule "ack/common"]
 	path = ack/common
 	url = https://github.com/zyedidia/kage.git
-	branch = kage01
+	branch = kage-6.18
 [submodule "linux"]
 	path = linux
 	url = https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
