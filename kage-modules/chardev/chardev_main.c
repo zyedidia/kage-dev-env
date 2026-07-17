@@ -22,7 +22,7 @@ struct my_tasklet_data {
     int counter;
 };
 
-void my_tasklet_handler(unsigned long data) {
+static void my_tasklet_handler(unsigned long data) {
     struct my_tasklet_data *tasklet_data = (struct my_tasklet_data *)data;
     tasklet_data->counter++;
     pr_info( "Tasklet counter: %d\n", tasklet_data->counter);

@@ -351,6 +351,7 @@ rootfs_clean:
 
 CPU ?= 4
 MEM ?= 1024
+QEMU_CPU ?= cortex-a76
 QEMU_EXTRA_ARGS ?=
 QEMU_EXTRA_KERNEL_CMDLINE ?=
 GDB ?= 0
@@ -413,7 +414,7 @@ else
 
   QEMU_ARGS += \
     -M virt \
-    -cpu max \
+    -cpu $(QEMU_CPU) \
     -semihosting-config enable=on,target=native
 endif
 
