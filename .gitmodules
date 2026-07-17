@@ -1,7 +1,7 @@
 [submodule "ack/common-modules/virtual-device"]
 	path = ack/common-modules/virtual-device
 	url = https://android.googlesource.com/kernel/common-modules/virtual-device
-	branch = android14-5.15
+	branch = android17-6.18
 [submodule "ack/common"]
 	path = ack/common
 	url = https://github.com/zyedidia/kage.git
