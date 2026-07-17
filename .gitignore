@@ -17,3 +17,6 @@ compile_commands.json
 *.ko
 
 *.tar.xz
+
+plan.md
+kage-modules/mmic_test
