@@ -10,10 +10,6 @@
 #include <linux/debugfs.h>
 #include <linux/dynamic_debug.h>
 
-// DEBUG
-#pragma clang optimize off
-
-
 #define MAX_DEV 1
 
 #define MODULE_NAME "kage_guest_test"

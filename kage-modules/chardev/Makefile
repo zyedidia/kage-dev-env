@@ -5,7 +5,7 @@ KDIR := $(BASE_DIR)/out/ack/common/arm64
 ARCH := arm64
 BINARY := chardev
 CROSS_COMPILE := aarch64-linux-gnu-
-EXTRA_CFLAGS := $(C_FLAGS) -fno-inline-functions --target=aarch64_lfi-linux-gnu -v -fintegrated-as -DCONFIG_64BIT
+EXTRA_CFLAGS := $(C_FLAGS) --target=aarch64_lfi-linux-gnu -v -fintegrated-as -DCONFIG_64BIT
 
 CC := $(LFI_LLVM_DIR)/bin/clang
 LD := $(LFI_LLVM_DIR)/bin/ld.lld
